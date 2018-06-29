@@ -26,7 +26,10 @@
 
     <button>start</button>
 
-    <script src="clmtrackr.min.js"></script>
+    <script src="js/clmtrackr.min.js"></script>
+    <script src="js/emotion_classifier.js"></script>
+    <script src="js/emotionmodel.js"></script>
+    <script src="js/model_pca_20_svm.js"></script>
     <script type="text/javascript">
 
         var ctracker;
@@ -47,8 +50,10 @@
                 console.log(error.name + ": " + error.message);
             });
 
-        ctracker = new clm.tracker();
-        ctracker.init();
+        pModel.shapeModel.nonRegularizedVectors.push(9);
+        pModel.shapeModel.nonRegularizedVectors.push(11);
+        ctracker = new clm.tracker({ useWebGL: true });
+        ctracker.init(pModel);
 
         function startTracking() {
             video.play();
@@ -64,9 +69,21 @@
             var position = ctracker.getCurrentPosition();
             if (position) {
                 ctracker.draw(canvas);
-
             }
+
+            var cp = ctracker.getCurrentParameters();
+            console.log(ec.meanPredict(cp));
         }
+
+        // delete object properties
+        delete emotionModel['disgusted'];
+        delete emotionModel['fear'];
+        var ec = new emotionClassifier();
+        ec.init(emotionModel);
+        var emotionData = ec.getBlank();
+
+        console.log(emotionData);
+
 
         document
             .querySelector("button")
